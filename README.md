@@ -5,7 +5,7 @@ A comprehensive feedback collection and analysis system that helps organizations
 ## Features
 
 - **Feedback Collection**: Easy-to-use interface for collecting customer feedback
-- **Sentiment Analysis**: Automatically analyze the sentiment of feedback using AI
+- **Sentiment Analysis**: Automatically analyze the sentiment of feedback using Google's Generative AI
 - **Interactive Dashboard**: Visualize feedback trends and sentiment distribution
 - **Feedback Management**: Organize and respond to feedback efficiently
 
@@ -25,7 +25,7 @@ USECASE3/
 ### Backend
 - Node.js
 - Express
-- Hugging Face AI for sentiment analysis
+- Google Generative AI (Gemini) for sentiment analysis
 - Supabase for database storage
 
 ### Frontend
@@ -60,9 +60,10 @@ USECASE3/
 4. Create a `.env` file in the backend directory with the following variables:
    ```
    PORT=5000
-   HUGGINGFACE_API_KEY=your_huggingface_api_key
+   GENAI_API_KEY=your_google_genai_api_key
+   GENAI_MODEL=gemini-2.0-flash
    SUPABASE_URL=your_supabase_url
-   SUPABASE_KEY=your_supabase_key
+   SUPABASE_ANON_KEY=your_supabase_key
    ```
 
 5. Start the development server
@@ -86,5 +87,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- Hugging Face for providing AI models
+- Google for providing the Generative AI (Gemini) API
 - Supabase for the database solution

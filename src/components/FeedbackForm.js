@@ -15,6 +15,40 @@ export function FeedbackForm(onSubmit) {
   // Email field
   const emailGroup = createFormGroup('email', 'Email', 'email', 'Your email address');
   
+  // Product dropdown field
+  const productGroup = document.createElement('div');
+  productGroup.className = 'form-group';
+  
+  const productLabel = document.createElement('label');
+  productLabel.setAttribute('for', 'product');
+  productLabel.textContent = 'Product';
+  
+  const productSelect = document.createElement('select');
+  productSelect.className = 'form-control';
+  productSelect.id = 'product';
+  productSelect.name = 'product';
+  productSelect.required = true;
+  
+  // Add default/placeholder option
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = '-- Select a product --';
+  defaultOption.disabled = true;
+  defaultOption.selected = true;
+  productSelect.appendChild(defaultOption);
+  
+  // Add product options
+  const products = ['Samsung mobile', 'Dell mouse', 'Smart watch', 'Acer laptop'];
+  products.forEach(product => {
+    const option = document.createElement('option');
+    option.value = product;
+    option.textContent = product;
+    productSelect.appendChild(option);
+  });
+  
+  productGroup.appendChild(productLabel);
+  productGroup.appendChild(productSelect);
+  
   // Rating field
   const ratingGroup = document.createElement('div');
   ratingGroup.className = 'form-group';
@@ -110,6 +144,7 @@ export function FeedbackForm(onSubmit) {
   // Append all elements to the form
   form.appendChild(nameGroup);
   form.appendChild(emailGroup);
+  form.appendChild(productGroup);
   form.appendChild(ratingGroup);
   form.appendChild(feedbackGroup);
   form.appendChild(sentimentResultsContainer);

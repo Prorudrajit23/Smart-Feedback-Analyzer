@@ -12,7 +12,7 @@ A comprehensive feedback collection and analysis system that helps organizations
 ## Project Structure
 
 ```
-feed/
+USECASE3/
   ├── backend/        # Node.js Express backend
   ├── public/         # Static assets
   └── src/

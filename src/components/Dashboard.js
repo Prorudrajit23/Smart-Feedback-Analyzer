@@ -75,32 +75,13 @@ export function Dashboard() {
   feedbackListContainer.appendChild(feedbackListTitle);
   feedbackListContainer.appendChild(feedbackList);
   
-  // Back button
-  const backButton = document.createElement('button');
-  backButton.className = 'btn';
-  backButton.style.marginTop = '20px';
-  backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Form';
-  
-  // Add event listener to back button
-  backButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    const event = new CustomEvent('showForm');
-    document.dispatchEvent(event);
-  });
-  
-  // Create button container
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.display = 'flex';
-  buttonContainer.style.gap = '10px';
-  
-  buttonContainer.appendChild(backButton);
-  
   // Append all elements to the dashboard
   dashboardElement.appendChild(dashboardTitle);
   dashboardElement.appendChild(statsContainer);
   dashboardElement.appendChild(chartContainer);
   dashboardElement.appendChild(feedbackListContainer);
-  dashboardElement.appendChild(buttonContainer);
+  
+  // Remove the back button and button container since we now have the navigation bar
   
   // Fetch feedback data when the dashboard is created
   fetchFeedbackData()
@@ -288,10 +269,168 @@ export function Dashboard() {
       return new Date(b.created_at || b.createdAt) - new Date(a.created_at || a.createdAt);
     });
     
-    // Display the most recent 10 feedbacks
-    const recentFeedback = sortedFeedback.slice(0, 10);
+    // Create tabs container
+    const tabsContainer = document.createElement('div');
+    tabsContainer.className = 'feedback-tabs';
+    tabsContainer.style.borderBottom = '1px solid #eee';
+    tabsContainer.style.display = 'flex';
+    tabsContainer.style.marginBottom = '15px';
     
-    recentFeedback.forEach(feedback => {
+    // Create tab buttons
+    const positiveTab = createTabButton('Positive', 'fas fa-thumbs-up', 'var(--success-color)');
+    const neutralTab = createTabButton('Neutral', 'fas fa-meh', 'var(--warning-color)');
+    const negativeTab = createTabButton('Negative', 'fas fa-thumbs-down', 'var(--danger-color)');
+    
+    // Set first tab as active by default
+    positiveTab.classList.add('active');
+    
+    // Add tabs to container
+    tabsContainer.appendChild(positiveTab);
+    tabsContainer.appendChild(neutralTab);
+    tabsContainer.appendChild(negativeTab);
+    
+    // Add tabs container to feedback list
+    feedbackList.appendChild(tabsContainer);
+    
+    // Create content container for feedback items
+    const feedbackContent = document.createElement('div');
+    feedbackContent.className = 'feedback-content';
+    feedbackList.appendChild(feedbackContent);
+    
+    // Categorize feedback by sentiment
+    const positiveFeedback = [];
+    const neutralFeedback = [];
+    const negativeFeedback = [];
+    
+    sortedFeedback.forEach(feedback => {
+      // Handle both camelCase and snake_case property names from database
+      const sentimentAnalysis = feedback.sentimentAnalysis || feedback.sentiment_analysis;
+      let sentiment = 'Unknown';
+      
+      if (sentimentAnalysis) {
+        if (typeof sentimentAnalysis === 'string') {
+          sentiment = sentimentAnalysis;
+        } else if (typeof sentimentAnalysis === 'object') {
+          sentiment = sentimentAnalysis.sentiment || 'Unknown';
+          
+          // If sentiment is still undefined, check if it's nested deeper
+          if (sentiment === 'Unknown' && sentimentAnalysis.rawOutput && Array.isArray(sentimentAnalysis.rawOutput)) {
+            const highestSentiment = [...sentimentAnalysis.rawOutput]
+              .sort((a, b) => b.score - a.score)[0];
+              
+            if (highestSentiment) {
+              if (highestSentiment.label.toLowerCase().includes('positive')) {
+                sentiment = 'Positive';
+              } else if (highestSentiment.label.toLowerCase().includes('negative')) {
+                sentiment = 'Negative';
+              } else {
+                sentiment = 'Neutral';
+              }
+            }
+          }
+        }
+      }
+      
+      // Categorize based on sentiment
+      if (sentiment === 'Positive') {
+        positiveFeedback.push(feedback);
+      } else if (sentiment === 'Negative') {
+        negativeFeedback.push(feedback);
+      } else {
+        neutralFeedback.push(feedback);
+      }
+    });
+    
+    // Initial display - show positive feedback by default
+    displayFeedbackItems(positiveFeedback);
+    
+    // Add click event listeners to tabs
+    positiveTab.addEventListener('click', () => {
+      setActiveTab(positiveTab);
+      displayFeedbackItems(positiveFeedback);
+    });
+    
+    neutralTab.addEventListener('click', () => {
+      setActiveTab(neutralTab);
+      displayFeedbackItems(neutralFeedback);
+    });
+    
+    negativeTab.addEventListener('click', () => {
+      setActiveTab(negativeTab);
+      displayFeedbackItems(negativeFeedback);
+    });
+    
+    // Helper function to create tab buttons
+    function createTabButton(label, iconClass, color) {
+      const tab = document.createElement('div');
+      tab.className = 'feedback-tab';
+      tab.style.padding = '10px 15px';
+      tab.style.cursor = 'pointer';
+      tab.style.flex = '1';
+      tab.style.textAlign = 'center';
+      tab.style.transition = 'all 0.3s ease';
+      
+      const icon = document.createElement('i');
+      icon.className = iconClass;
+      icon.style.marginRight = '5px';
+      icon.style.color = color;
+      
+      tab.appendChild(icon);
+      tab.appendChild(document.createTextNode(label));
+      
+      // Hover effect
+      tab.addEventListener('mouseover', () => {
+        if (!tab.classList.contains('active')) {
+          tab.style.backgroundColor = '#f5f5f5';
+        }
+      });
+      
+      tab.addEventListener('mouseout', () => {
+        if (!tab.classList.contains('active')) {
+          tab.style.backgroundColor = 'transparent';
+        }
+      });
+      
+      return tab;
+    }
+    
+    // Helper function to set active tab
+    function setActiveTab(activeTab) {
+      // Remove active class from all tabs
+      document.querySelectorAll('.feedback-tab').forEach(tab => {
+        tab.classList.remove('active');
+        tab.style.backgroundColor = 'transparent';
+        tab.style.borderBottom = 'none';
+      });
+      
+      // Add active class to clicked tab
+      activeTab.classList.add('active');
+      activeTab.style.backgroundColor = '#f9f9f9';
+      activeTab.style.borderBottom = '3px solid var(--primary-color)';
+    }
+    
+    // Helper function to display feedback items for a category
+    function displayFeedbackItems(feedbackArray) {
+      const feedbackContent = document.querySelector('.feedback-content');
+      feedbackContent.innerHTML = '';
+      
+      if (feedbackArray.length === 0) {
+        const emptyMessage = document.createElement('p');
+        emptyMessage.textContent = 'No feedback in this category.';
+        emptyMessage.style.textAlign = 'center';
+        emptyMessage.style.padding = '20px';
+        feedbackContent.appendChild(emptyMessage);
+        return;
+      }
+      
+      feedbackArray.forEach(feedback => {
+        const feedbackItem = createFeedbackItem(feedback);
+        feedbackContent.appendChild(feedbackItem);
+      });
+    }
+    
+    // Helper function to create feedback item
+    function createFeedbackItem(feedback) {
       const feedbackItem = document.createElement('div');
       feedbackItem.className = 'feedback-item';
       feedbackItem.style.padding = '15px';
@@ -336,15 +475,42 @@ export function Dashboard() {
         sentimentIcon = 'fas fa-frown';
       }
       
-      const header = document.createElement('div');
-      header.style.display = 'flex';
-      header.style.justifyContent = 'space-between';
-      header.style.marginBottom = '10px';
+      // User info section
+      const userInfo = document.createElement('div');
+      userInfo.style.display = 'flex';
+      userInfo.style.justifyContent = 'space-between';
+      userInfo.style.marginBottom = '10px';
       
-      const name = document.createElement('strong');
-      name.textContent = feedback.name || 'Anonymous';
+      // User name and email
+      const userDetails = document.createElement('div');
       
-      // Rating display instead of product
+      const userName = document.createElement('strong');
+      userName.textContent = feedback.name || 'Anonymous';
+      
+      const userEmail = document.createElement('div');
+      userEmail.style.fontSize = '0.9em';
+      userEmail.style.color = 'var(--gray-color)';
+      userEmail.style.marginTop = '2px';
+      userEmail.textContent = feedback.email || 'No email provided';
+      
+      // Product information
+      const productInfo = document.createElement('div');
+      productInfo.style.fontSize = '0.9em';
+      productInfo.style.marginTop = '4px';
+      
+      const productIcon = document.createElement('i');
+      productIcon.className = 'fas fa-box-open';
+      productIcon.style.marginRight = '5px';
+      productIcon.style.color = 'var(--primary-color)';
+      
+      productInfo.appendChild(productIcon);
+      productInfo.appendChild(document.createTextNode(feedback.product || 'No product specified'));
+      
+      userDetails.appendChild(userName);
+      userDetails.appendChild(userEmail);
+      userDetails.appendChild(productInfo);
+      
+      // Rating display
       const rating = document.createElement('span');
       rating.style.color = 'var(--primary-color)';
       
@@ -359,25 +525,29 @@ export function Dashboard() {
       }
       rating.textContent = stars;
       
-      header.appendChild(name);
-      header.appendChild(rating);
+      userInfo.appendChild(userDetails);
+      userInfo.appendChild(rating);
       
+      // Feedback text
       const feedbackText = document.createElement('p');
       feedbackText.textContent = feedback.feedback;
       feedbackText.style.marginBottom = '10px';
       
+      // Footer section (sentiment and date)
       const footer = document.createElement('div');
       footer.style.display = 'flex';
       footer.style.justifyContent = 'space-between';
       footer.style.alignItems = 'center';
       footer.style.fontSize = '0.9rem';
       
+      // Sentiment badge
       const sentimentBadge = document.createElement('span');
       sentimentBadge.innerHTML = `<i class="${sentimentIcon}" style="color: ${sentimentColor}"></i> ${sentiment}`;
       sentimentBadge.style.padding = '3px 8px';
       sentimentBadge.style.borderRadius = '10px';
       sentimentBadge.style.backgroundColor = `${sentimentColor}20`;
       
+      // Date
       const date = document.createElement('span');
       date.textContent = new Date(feedback.created_at || feedback.createdAt).toLocaleDateString();
       date.style.color = 'var(--gray-color)';
@@ -385,12 +555,13 @@ export function Dashboard() {
       footer.appendChild(sentimentBadge);
       footer.appendChild(date);
       
-      feedbackItem.appendChild(header);
+      // Assemble all parts
+      feedbackItem.appendChild(userInfo);
       feedbackItem.appendChild(feedbackText);
       feedbackItem.appendChild(footer);
       
-      feedbackList.appendChild(feedbackItem);
-    });
+      return feedbackItem;
+    }
   }
   
   // Helper function to draw sentiment chart - modified to use already loaded Chart.js

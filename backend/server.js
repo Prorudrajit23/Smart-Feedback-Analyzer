@@ -102,6 +102,56 @@ app.post('/api/feedback', async (req, res) => {
   }
 });
 
+// API endpoint to get feedback summaries by product
+app.get('/api/feedback/summaries', async (req, res) => {
+  try {
+    // Get all feedback data from Supabase
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    // Group feedback by product
+    const feedbackByProduct = {};
+    data.forEach(feedback => {
+      const product = feedback.product || 'Unknown Product';
+      if (!feedbackByProduct[product]) {
+        feedbackByProduct[product] = [];
+      }
+      feedbackByProduct[product].push(feedback);
+    });
+    
+    // Generate summaries and suggestions for each product
+    const summaries = [];
+    for (const [product, productFeedback] of Object.entries(feedbackByProduct)) {
+      if (productFeedback.length > 0) {
+        try {
+          const summary = await generateFeedbackSummary(product, productFeedback);
+          summaries.push({
+            product,
+            feedbackCount: productFeedback.length,
+            summary
+          });
+        } catch (summaryError) {
+          console.error(`Error generating summary for ${product}:`, summaryError);
+          summaries.push({
+            product,
+            feedbackCount: productFeedback.length,
+            error: `Failed to generate summary: ${summaryError.message}`
+          });
+        }
+      }
+    }
+    
+    res.json(summaries);
+  } catch (error) {
+    console.error('Error generating feedback summaries:', error);
+    res.status(500).json({ error: 'Error generating feedback summaries' });
+  }
+});
+
 // Function to analyze sentiment with Gemini API
 async function analyzeSentimentWithGeminiAPI(text) {
   try {
@@ -190,6 +240,88 @@ async function analyzeSentimentWithGeminiAPI(text) {
   }
 }
 
+// Function to generate feedback summary and suggestions using Gemini API
+async function generateFeedbackSummary(product, feedbackList) {
+  try {
+    console.log(`Generating summary for ${product} with ${feedbackList.length} feedback entries`);
+    
+    // Prepare feedback data in a structured format
+    const feedbackData = feedbackList.map(item => ({
+      text: item.feedback,
+      rating: item.rating || 'N/A',
+      sentiment: item.sentiment_analysis?.sentiment || 'Unknown'
+    }));
+    
+    // Create a maximum of 10 feedback entries to avoid exceeding token limits
+    const limitedFeedback = feedbackData.slice(0, 10);
+    
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GENAI_API_KEY}`;
+    
+    // Format request payload with detailed instructions for Gemini
+    const requestBody = {
+      contents: [{
+        parts: [{
+          text: `You are a product feedback analyst for a company that sells consumer electronics. 
+          I want you to analyze user feedback for the product "${product}" and provide:
+          
+          1. A concise summary of the key points from user feedback (3-5 bullet points)
+          2. Major strengths of the product based on positive feedback
+          3. Major areas of improvement based on negative feedback
+          4. Specific actionable suggestions for product improvements
+          5. Suggestions for new features based on user needs
+          
+          Format the response as a JSON object with these keys:
+          - "summary": array of summary bullet points
+          - "strengths": array of product strengths
+          - "improvements": array of areas needing improvement
+          - "suggestions": array of specific actionable suggestions
+          - "newFeatures": array of new feature ideas
+          
+          Here is the feedback data:
+          ${JSON.stringify(limitedFeedback, null, 2)}
+          
+          Only include suggestions that are directly supported by the feedback. If there's not enough data to make recommendations in any area, include an empty array for that field.`
+        }]
+      }]
+    };
+    
+    // Make the request to Gemini API
+    const response = await axios.post(apiUrl, requestBody, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    // Extract and parse the response
+    let textContent = '';
+    if (response.data?.candidates?.[0]?.content?.parts?.[0]) {
+      textContent = response.data.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error("Unexpected response format from Gemini API");
+    }
+    
+    // Extract JSON from the response
+    let parsedResponse;
+    try {
+      // Try to parse the entire response as JSON
+      parsedResponse = JSON.parse(textContent);
+    } catch (parseError) {
+      // If that fails, try to extract JSON from the text response
+      const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsedResponse = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error("Could not parse JSON from response");
+      }
+    }
+    
+    return parsedResponse;
+  } catch (error) {
+    console.error("Error generating feedback summary:", error);
+    throw error;
+  }
+}
+
 // Function to store feedback in Supabase
 async function storeFeedback(feedback) {
   try {
@@ -200,6 +332,7 @@ async function storeFeedback(feedback) {
     const dbFeedback = {
       name: feedback.name || null,
       email: feedback.email || null,
+      product: feedback.product || null,  // Add the new product field
       rating: feedback.rating ? parseInt(feedback.rating, 10) || null : null,
       feedback: feedback.feedback,
       timestamp: new Date().toISOString(),

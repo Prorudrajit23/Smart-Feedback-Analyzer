@@ -1,22 +1,28 @@
-# Feedback Analyzer
+# Smart Feedback Collector
 
 A comprehensive feedback collection and analysis system that helps organizations gather, analyze, and extract valuable insights from customer feedback.
 
 ## Features
 
-- **Feedback Collection**: Easy-to-use interface for collecting customer feedback
-- **Sentiment Analysis**: Automatically analyze the sentiment of feedback using Google's Generative AI
-- **Interactive Dashboard**: Visualize feedback trends and sentiment distribution
-- **Feedback Management**: Organize and respond to feedback efficiently
+- **Smart Feedback Collection**: Easy-to-use interface for collecting customer feedback with product categorization
+- **AI-Powered Sentiment Analysis**: Automatically analyze the sentiment of feedback using Google's Generative AI (Gemini)
+- **Interactive Dashboard**: Visualize feedback trends and sentiment distribution with tabs for positive, neutral, and negative feedback
+- **Product-Based Insights**: AI-generated summaries, strengths, improvements, and feature suggestions per product
+- **Consistent Navigation**: Easy navigation between feedback form, dashboard, and product insights
 
 ## Project Structure
 
 ```
-USECASE3/
+feed/
   ├── backend/        # Node.js Express backend
   ├── public/         # Static assets
-  └── src/            # React frontend
-      ├── components/ # React components
+  └── src/
+      ├── components/ # JavaScript components 
+      │   ├── App.js
+      │   ├── Dashboard.js
+      │   ├── FeedbackForm.js
+      │   ├── FeedbackSummary.js
+      │   └── ThankYouMessage.js
       └── styles/     # CSS stylesheets
 ```
 
@@ -25,12 +31,13 @@ USECASE3/
 ### Backend
 - Node.js
 - Express
-- Google Generative AI (Gemini) for sentiment analysis
+- Google Generative AI (Gemini) for sentiment analysis and insights generation
 - Supabase for database storage
 
 ### Frontend
-- React.js
-- Modern CSS
+- Vanilla JavaScript with component-based architecture
+- Chart.js for data visualization
+- Modern CSS with responsive design
 
 ## Getting Started
 
@@ -41,24 +48,24 @@ USECASE3/
 ### Installation
 
 1. Clone the repository
-   ```
+   ```bash
    git clone https://github.com/Prorudrajit23/Feedback-Analyzer.git
    cd Feedback-Analyzer
    ```
 
 2. Install frontend dependencies
-   ```
+   ```bash
    npm install
    ```
 
 3. Install backend dependencies
-   ```
+   ```bash
    cd backend
    npm install
    ```
 
 4. Create a `.env` file in the backend directory with the following variables:
-   ```
+   ```bash
    PORT=5000
    GENAI_API_KEY=your_google_genai_api_key
    GENAI_MODEL=gemini-2.0-flash
@@ -67,7 +74,7 @@ USECASE3/
    ```
 
 5. Start the development server
-   ```
+   ```bash
    # Start backend (from backend directory)
    npm run dev
    

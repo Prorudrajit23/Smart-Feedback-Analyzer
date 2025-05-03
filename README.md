@@ -5,7 +5,7 @@ A comprehensive feedback collection and analysis system that helps organizations
 ## Features
 
 - **Feedback Collection**: Easy-to-use interface for collecting customer feedback
-- **Sentiment Analysis**: Automatically analyze the sentiment of feedback using AI
+- **Sentiment Analysis**: Automatically analyze the sentiment of feedback using Google's Generative AI
 - **Interactive Dashboard**: Visualize feedback trends and sentiment distribution
 - **Feedback Management**: Organize and respond to feedback efficiently
 
@@ -30,7 +30,7 @@ USECASE3/
 ### Backend
 - Node.js
 - Express
-- Hugging Face AI for sentiment analysis
+- Google Generative AI (Gemini) for sentiment analysis
 - Supabase for database storage
 
 ### Frontend
@@ -94,4 +94,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Google for providing the Generative AI (Gemini) API
+   feature/feedback-summary-and-navigation
 - Supabase for the database solution

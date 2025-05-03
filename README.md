@@ -1,4 +1,4 @@
-# Feedback Analyzer
+# Smart Feedback Collector
 
 A comprehensive feedback collection and analysis system that helps organizations gather, analyze, and extract valuable insights from customer feedback.
 
@@ -15,8 +15,13 @@ A comprehensive feedback collection and analysis system that helps organizations
 USECASE3/
   ├── backend/        # Node.js Express backend
   ├── public/         # Static assets
-  └── src/            # React frontend
-      ├── components/ # React components
+  └── src/
+      ├── components/ # JavaScript components 
+      │   ├── App.js
+      │   ├── Dashboard.js
+      │   ├── FeedbackForm.js
+      │   ├── FeedbackSummary.js
+      │   └── ThankYouMessage.js
       └── styles/     # CSS stylesheets
 ```
 
@@ -29,8 +34,9 @@ USECASE3/
 - Supabase for database storage
 
 ### Frontend
-- React.js
-- Modern CSS
+- Vanilla JavaScript with component-based architecture
+- Chart.js for data visualization
+- Modern CSS with responsive design
 
 ## Getting Started
 
@@ -41,24 +47,24 @@ USECASE3/
 ### Installation
 
 1. Clone the repository
-   ```
+   ```bash
    git clone https://github.com/Prorudrajit23/Feedback-Analyzer.git
    cd Feedback-Analyzer
    ```
 
 2. Install frontend dependencies
-   ```
+   ```bash
    npm install
    ```
 
 3. Install backend dependencies
-   ```
+   ```bash
    cd backend
    npm install
    ```
 
 4. Create a `.env` file in the backend directory with the following variables:
-   ```
+   ```bash
    PORT=5000
    GENAI_API_KEY=your_google_genai_api_key
    GENAI_MODEL=gemini-2.0-flash
@@ -67,7 +73,7 @@ USECASE3/
    ```
 
 5. Start the development server
-   ```
+   ```bash
    # Start backend (from backend directory)
    npm run dev
    
@@ -88,4 +94,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgments
 
 - Google for providing the Generative AI (Gemini) API
+   feature/feedback-summary-and-navigation
 - Supabase for the database solution

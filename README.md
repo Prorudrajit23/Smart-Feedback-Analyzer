@@ -4,11 +4,10 @@ A comprehensive feedback collection and analysis system that helps organizations
 
 ## Features
 
-- **Smart Feedback Collection**: Easy-to-use interface for collecting customer feedback with product categorization
-- **AI-Powered Sentiment Analysis**: Automatically analyze the sentiment of feedback using Google's Generative AI (Gemini)
-- **Interactive Dashboard**: Visualize feedback trends and sentiment distribution with tabs for positive, neutral, and negative feedback
-- **Product-Based Insights**: AI-generated summaries, strengths, improvements, and feature suggestions per product
-- **Consistent Navigation**: Easy navigation between feedback form, dashboard, and product insights
+- **Feedback Collection**: Easy-to-use interface for collecting customer feedback
+- **Sentiment Analysis**: Automatically analyze the sentiment of feedback using AI
+- **Interactive Dashboard**: Visualize feedback trends and sentiment distribution
+- **Feedback Management**: Organize and respond to feedback efficiently
 
 ## Project Structure
 
@@ -31,7 +30,7 @@ feed/
 ### Backend
 - Node.js
 - Express
-- Google Generative AI (Gemini) for sentiment analysis and insights generation
+- Hugging Face AI for sentiment analysis
 - Supabase for database storage
 
 ### Frontend

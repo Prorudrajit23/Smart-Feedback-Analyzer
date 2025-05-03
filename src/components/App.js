@@ -1,6 +1,7 @@
 import { FeedbackForm } from './FeedbackForm.js';
 import { ThankYouMessage } from './ThankYouMessage.js';
 import { Dashboard } from './Dashboard.js';
+import { FeedbackSummary } from './FeedbackSummary.js';
 
 // API URL pointing to your running server
 const API_URL = 'http://localhost:3000/api';
@@ -16,25 +17,82 @@ export function App() {
   const headerContainer = document.createElement('div');
   headerContainer.className = 'container';
   
+  const headerContent = document.createElement('div');
+  headerContent.style.display = 'flex';
+  headerContent.style.justifyContent = 'space-between';
+  headerContent.style.alignItems = 'center';
+  headerContent.style.flexWrap = 'wrap';
+  
+  const titleContainer = document.createElement('div');
+  
   const title = document.createElement('h1');
   title.textContent = 'Smart Feedback Collector';
+  title.style.marginBottom = '5px';
   
   const subtitle = document.createElement('p');
   subtitle.textContent = 'We value your feedback! Help us improve our products and services.';
+  subtitle.style.margin = '0';
+  subtitle.style.fontSize = '0.9rem';
+  
+  titleContainer.appendChild(title);
+  titleContainer.appendChild(subtitle);
+  
+  // Create navigation bar
+  const navBar = document.createElement('nav');
+  navBar.id = 'main-nav';
+  navBar.style.backgroundColor = 'var(--primary-color)';
+  navBar.style.padding = '10px 0';
+  navBar.style.borderRadius = '5px';
+  navBar.style.marginTop = '20px';
+  navBar.style.marginBottom = '20px';
+  navBar.style.width = '100%';
+  navBar.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+  
+  const navContainer = document.createElement('div');
+  navContainer.style.display = 'flex';
+  navContainer.style.justifyContent = 'center';
+  navContainer.style.gap = '10px';
+  
+  // Home button
+  const homeButton = document.createElement('button');
+  homeButton.className = 'nav-btn';
+  homeButton.id = 'home-btn';
+  homeButton.innerHTML = '<i class="fas fa-home"></i> Home';
+  homeButton.addEventListener('click', function(e) {
+    e.preventDefault();
+    showForm();
+  });
   
   // Dashboard button
   const dashboardButton = document.createElement('button');
-  dashboardButton.className = 'btn';
-  dashboardButton.style.marginTop = '20px';
-  dashboardButton.innerHTML = '<i class="fas fa-chart-bar"></i> View Dashboard';
+  dashboardButton.className = 'nav-btn';
+  dashboardButton.id = 'dashboard-btn';
+  dashboardButton.innerHTML = '<i class="fas fa-chart-bar"></i> Feedback Dashboard';
   dashboardButton.addEventListener('click', function(e) {
-    e.preventDefault(); // Prevent default behavior
+    e.preventDefault();
     showDashboard();
   });
   
-  headerContainer.appendChild(title);
-  headerContainer.appendChild(subtitle);
-  headerContainer.appendChild(dashboardButton);
+  // Insights button
+  const insightsButton = document.createElement('button');
+  insightsButton.className = 'nav-btn';
+  insightsButton.id = 'insights-btn';
+  insightsButton.innerHTML = '<i class="fas fa-lightbulb"></i> Product Insights';
+  insightsButton.addEventListener('click', function(e) {
+    e.preventDefault();
+    showFeedbackSummary();
+  });
+  
+  // Add buttons to navigation container
+  navContainer.appendChild(homeButton);
+  navContainer.appendChild(dashboardButton);
+  navContainer.appendChild(insightsButton);
+  navBar.appendChild(navContainer);
+  
+  // Add title and navigation to header
+  headerContent.appendChild(titleContainer);
+  headerContainer.appendChild(headerContent);
+  headerContainer.appendChild(navBar);
   header.appendChild(headerContainer);
   
   // Create main container
@@ -59,16 +117,63 @@ export function App() {
   app.appendChild(main);
   app.appendChild(footer);
   
+  // Add CSS for nav buttons
+  const style = document.createElement('style');
+  style.textContent = `
+    .nav-btn {
+      background-color: transparent;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .nav-btn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .nav-btn.active {
+      background-color: rgba(255, 255, 255, 0.3);
+      font-weight: bold;
+    }
+  `;
+  document.head.appendChild(style);
+  
   // Listen for showForm event from the Dashboard
   document.addEventListener('showForm', showForm);
   
-  // Listen for showDashboard event from ThankYouMessage
+  // Listen for showDashboard event from ThankYouMessage or FeedbackSummary
   document.addEventListener('showDashboard', showDashboard);
+  
+  // Function to update active navigation button
+  function updateActiveNavButton(activeId) {
+    // Remove active class from all navigation buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    // Add active class to the current page button
+    if (activeId) {
+      const activeBtn = document.getElementById(activeId);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+    }
+  }
   
   // Function to show the form again (home view)
   function showForm() {
     // Scroll to top of page
     window.scrollTo(0, 0);
+    
+    // Update active navigation button
+    updateActiveNavButton('home-btn');
     
     // Clear the main section
     main.innerHTML = '';
@@ -76,9 +181,6 @@ export function App() {
     // Show form again
     const feedbackFormElement = FeedbackForm(handleSubmit);
     main.appendChild(feedbackFormElement);
-    
-    // Make dashboard button visible again
-    dashboardButton.style.display = 'inline-block';
   }
   
   // Handle form submission
@@ -307,8 +409,19 @@ export function App() {
       showDashboard();
     });
     
+    // View insights button
+    const viewInsightsBtn = document.createElement('button');
+    viewInsightsBtn.className = 'btn';
+    viewInsightsBtn.style.flex = '1';
+    viewInsightsBtn.style.backgroundColor = '#673ab7'; // Purple color for distinction
+    viewInsightsBtn.innerHTML = '<i class="fas fa-lightbulb"></i> View Insights';
+    viewInsightsBtn.addEventListener('click', () => {
+      showFeedbackSummary();
+    });
+    
     buttonContainer.appendChild(submitAnotherBtn);
     buttonContainer.appendChild(viewDashboardBtn);
+    buttonContainer.appendChild(viewInsightsBtn);
     container.appendChild(buttonContainer);
     
     // Hide the submit button instead of just disabling it
@@ -355,8 +468,8 @@ export function App() {
     // Scroll to top of page
     window.scrollTo(0, 0);
     
-    // Hide dashboard button when on dashboard
-    dashboardButton.style.display = 'none';
+    // Update active navigation button
+    updateActiveNavButton('dashboard-btn');
     
     // Clear the main section
     main.innerHTML = '';
@@ -365,6 +478,25 @@ export function App() {
     const dashboardElement = Dashboard();
     main.appendChild(dashboardElement);
   }
+  
+  // Function to show the feedback summary and insights
+  function showFeedbackSummary() {
+    // Scroll to top of page
+    window.scrollTo(0, 0);
+    
+    // Update active navigation button
+    updateActiveNavButton('insights-btn');
+    
+    // Clear the main section
+    main.innerHTML = '';
+    
+    // Show feedback summary
+    const summaryElement = FeedbackSummary();
+    main.appendChild(summaryElement);
+  }
+
+  // Initialize the active navigation button on page load
+  updateActiveNavButton('home-btn');
   
   return app;
 }
